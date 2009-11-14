@@ -1,5 +1,3 @@
-#!/home/semih/py3/bin/python3
-
 import pysvn, os, smtplib, pickle, email.utils, sys, base64
 from email.mime.text import MIMEText
 
@@ -10,8 +8,6 @@ except ImportError:
 	sys.exit()
 
 def sendmail(to, subject, body, smtpinfo):
-	print('Sending email to ' + to)
-
 	if smtpinfo['secure']:
 		smtp = smtplib.SMTP_SSL(smtpinfo['host'], smtpinfo['port'])
 	else:
@@ -19,7 +15,8 @@ def sendmail(to, subject, body, smtpinfo):
 	
 	if 'user' and 'pass' in smtpinfo:
 		smtp.login(smtpinfo['user'], smtpinfo['pass'])
-	
+
+	# Don't check the subject, just b64 encode it...	
 	headers = 'To: ' + to + '\r\n' + \
 			'Subject: =?UTF-8?B?' + \
 			base64.b64encode(subject.encode('utf-8')).decode('utf-8') + \
@@ -54,13 +51,10 @@ def save_status(status):
 	return True
 
 status = load_status()
-print('Old status is:') 
-print(status)
 
 svn = pysvn.Client()
 
 for repo in config.configuration['repositories']:
-	print('Checking ' + repo['addr'])
 	if not repo['addr'] in status:
 		status[repo['addr']] = {}
 	
@@ -112,5 +106,4 @@ for repo in config.configuration['repositories']:
 # Now sae the status
 save_status(status)
 
-print('done')
 
