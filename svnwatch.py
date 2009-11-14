@@ -1,11 +1,11 @@
-import pysvn, os, smtplib, pickle, email.utils, sys, base64
+import pysvn, os, smtplib, pickle, email.utils, base64
 from email.mime.text import MIMEText
 
 try:
 	import config
 except ImportError:
 	print('Cannot find configuration file..')
-	sys.exit()
+	exit()
 
 def sendmail(to, subject, body, smtpinfo):
 	if smtpinfo['secure']:
@@ -15,9 +15,9 @@ def sendmail(to, subject, body, smtpinfo):
 	
 	if 'user' and 'pass' in smtpinfo:
 		smtp.login(smtpinfo['user'], smtpinfo['pass'])
-
-	# Don't check the subject, just b64 encode it...	
-	headers = 'To: ' + to + '\r\n' + \
+	
+	# Don't check the subject, just b64 encode it...
+	headers = 'To: ' + to + '\r\n' +  \
 			'Subject: =?UTF-8?B?' + \
 			base64.b64encode(subject.encode('utf-8')).decode('utf-8') + \
 			'?=\r\n' + \
@@ -63,15 +63,21 @@ for repo in config.configuration['repositories']:
 	else:
 		start_rev = repo['start_revision']
 
+	info = svn.info2(repo['addr'])
+
+	# If the HEAD is our start_rev dont't do anything
+	if info[0][1]['last_changed_rev'].number == start_rev:
+		continue
+	
 	logs = svn.log(
-					url_or_path = repo['addr'], 
-					revision_start = pysvn.Revision( 
-						pysvn.opt_revision_kind.number, start_rev
-					),
-					revision_end = pysvn.Revision(
-						pysvn.opt_revision_kind.head
-					)
-				)
+			url_or_path = repo['addr'], 
+			revision_start = pysvn.Revision( 
+				pysvn.opt_revision_kind.number, start_rev
+			),
+			revision_end = pysvn.Revision(
+				pysvn.opt_revision_kind.head
+			)
+		)
 	
 	for log in logs:
 		if log.data['author'] in repo['watch_users']:
