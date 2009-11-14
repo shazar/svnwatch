@@ -1,0 +1,14 @@
+svnwatch is a simple python script to watch given svn repositories and send emails with commit message and diffs.
+
+It needs:
+	- python3
+	- pysvn
+	- a temp folder to generate diffs
+	- a folder to store the previous state in a file
+
+I might add a verbose mode later.
+
+Oh, and also That's my first python script, so if you see anything just tell me.
+
+
+
